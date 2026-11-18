@@ -9,8 +9,6 @@ import {
   Plus, 
   Phone, 
   RotateCcw, 
-  Edit3, 
-  Trash2, 
   ExternalLink,
   CheckCircle,
   Building2
@@ -212,31 +210,13 @@ export default function UMKM({
                     </div>
                   </div>
 
-                  {/* Rating, Admin Actions, and Contact Button */}
+                  {/* Rating and Detail Button */}
                   <div className="mt-4 pt-3 border-t border-slate-100 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1 text-xs">
                         <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                         <span className="font-bold text-slate-800">{item.rating}</span>
                         <span className="text-slate-400">({item.ulasan} ulasan)</span>
-                      </div>
-
-                      {/* Admin Quick Action Buttons */}
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => onEditUMKM(item)}
-                          title="Edit UMKM (Admin)"
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => onDeleteUMKM(item.id)}
-                          title="Hapus UMKM (Admin)"
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
                       </div>
                     </div>
 
