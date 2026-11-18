@@ -228,7 +228,7 @@ export default function App() {
   // Navigasi User Desktop Sidebar
   const userMenuItems = [
     { id: 'beranda', label: 'Beranda', icon: <Home className="w-5 h-5" /> },
-    { id: 'katalog', label: 'Katalog Anda', icon: <Grid className="w-5 h-5" /> },
+    { id: 'katalog', label: 'Data UMKM Anda', icon: <Store className="w-5 h-5" /> },
     { id: 'informasi', label: 'Informasi', icon: <Info className="w-5 h-5" /> },
   ];
 
@@ -523,6 +523,7 @@ export default function App() {
               {activeUserTab === 'beranda' && (
                 <UserBeranda
                   umkmList={umkmList}
+                  userAuth={userAuth}
                   setActiveUserTab={setActiveUserTab}
                   onSelectUMKM={(item) => setSelectedUMKM(item)}
                   searchQuery={searchQuery}
@@ -565,8 +566,8 @@ export default function App() {
                 activeUserTab === 'katalog' ? 'text-blue-600' : 'text-slate-500'
               }`}
             >
-              <Grid className="w-5 h-5 mb-0.5" />
-              <span>Katalog Anda</span>
+              <Store className="w-5 h-5 mb-0.5" />
+              <span>Data UMKM Anda</span>
             </button>
 
             <button
