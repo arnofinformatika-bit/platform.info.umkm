@@ -11,19 +11,17 @@ export default defineConfig({
     {
       name: 'decode-url-ids',
       resolveId(id) {
-        const decoded = decodeURIComponent(id);
-        if (
-          decoded.includes('/pages/') || 
-          decoded.includes('/user/') || 
-          decoded.includes('/admin/') ||
-          decoded.startsWith('pages/') ||
-          decoded.startsWith('user/') ||
-          decoded.startsWith('admin/')
-        ) {
-          const clean = decoded.startsWith('/') ? decoded.slice(1) : decoded;
+        if (!id || !id.includes('%')) return null;
+        try {
+          const decoded = decodeURIComponent(id);
+          if (path.isAbsolute(decoded)) {
+            return decoded;
+          }
+          const clean = decoded.replace(/^\/+/, '');
           return path.resolve(__dirname, clean);
+        } catch (_) {
+          return null;
         }
-        return null;
       },
     },
     {
