@@ -193,6 +193,32 @@ export const subscribeUsers = (onSuccess) => {
   }
 };
 
+/**
+ * Mengambil data pengguna secara realtime satu kali (misal saat login)
+ */
+export const fetchUsersOnce = async () => {
+  if (!rtdb) return [];
+  try {
+    const snapshot = await get(ref(rtdb, 'users'));
+    if (snapshot.exists()) {
+      const val = snapshot.val();
+      let list = [];
+      if (Array.isArray(val)) {
+        list = val.filter(Boolean);
+      } else if (typeof val === 'object' && val !== null) {
+        list = Object.keys(val).map((k) => ({
+          ...val[k],
+          id: Number(val[k].id) || val[k].id || k
+        }));
+      }
+      return list;
+    }
+  } catch (err) {
+    console.error('[Firebase] fetchUsersOnce error:', err);
+  }
+  return [];
+};
+
 // ==========================================
 // 3. KELOLA KATEGORI & EVENT
 // ==========================================

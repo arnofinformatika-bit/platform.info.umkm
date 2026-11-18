@@ -340,9 +340,12 @@ export default function App() {
 
             {landingTab === 'Masuk' && (
               <MasukLanding
+                usersList={usersList}
                 onLoginSuccess={(user) => {
                   setUserAuth(user);
-                  if (user.role === 'admin') {
+                  const normalizedRole = (user.role || '').toLowerCase();
+                  const normalizedEmail = (user.email || '').toLowerCase();
+                  if (normalizedRole === 'admin' || normalizedRole === 'administrator' || normalizedEmail === 'arnof@gmail.com') {
                     setCurrentMode('admin');
                   } else {
                     setCurrentMode('user');
@@ -875,16 +878,6 @@ export default function App() {
                     <ArrowLeft className="w-4 h-4" />
                     <span>Kembali ke Beranda Utama</span>
                   </button>
-                  <button
-                    onClick={() => {
-                      setCurrentMode('user');
-                      setMoreMenuOpen(false);
-                    }}
-                    className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <User className="w-4 h-4" />
-                    <span>Buka Tampilan User Portal</span>
-                  </button>
                 </div>
               </div>
             )}
@@ -924,16 +917,6 @@ export default function App() {
                   >
                     <ArrowLeft className="w-4 h-4" />
                     <span>Kembali ke Beranda Utama</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setCurrentMode('admin');
-                      setMoreMenuOpen(false);
-                    }}
-                    className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <ShieldCheck className="w-4 h-4 text-blue-400" />
-                    <span>Buka Admin Panel</span>
                   </button>
                 </div>
               </div>
