@@ -228,7 +228,7 @@ export default function App() {
   // Navigasi User Desktop Sidebar
   const userMenuItems = [
     { id: 'beranda', label: 'Beranda', icon: <Home className="w-5 h-5" /> },
-    { id: 'katalog', label: 'Katalog', icon: <Grid className="w-5 h-5" /> },
+    { id: 'katalog', label: 'Katalog Anda', icon: <Grid className="w-5 h-5" /> },
     { id: 'informasi', label: 'Informasi', icon: <Info className="w-5 h-5" /> },
   ];
 
@@ -326,6 +326,11 @@ export default function App() {
             {landingTab === 'Daftar' && (
               <DaftarLanding
                 onRegisterUser={handleRegisterUser}
+                onDirectLogin={(user) => {
+                  setUserAuth(user);
+                  setCurrentMode('user');
+                  setActiveUserTab('katalog');
+                }}
                 onAddUMKM={(newItem) => {
                   handleSaveUMKM(newItem);
                 }}
@@ -529,6 +534,9 @@ export default function App() {
               {activeUserTab === 'katalog' && (
                 <UserKatalog
                   umkmList={umkmList}
+                  userAuth={userAuth}
+                  onSaveUMKM={handleSaveUMKM}
+                  onDeleteUMKM={handleDeleteUMKM}
                   onSelectUMKM={(item) => setSelectedUMKM(item)}
                 />
               )}
@@ -558,7 +566,7 @@ export default function App() {
               }`}
             >
               <Grid className="w-5 h-5 mb-0.5" />
-              <span>Katalog</span>
+              <span>Katalog Anda</span>
             </button>
 
             <button

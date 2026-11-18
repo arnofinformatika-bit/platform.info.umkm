@@ -17,7 +17,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 
-export default function Daftar({ onAddUMKM, onRegisterUser, setActiveTab }) {
+export default function Daftar({ onAddUMKM, onRegisterUser, onDirectLogin, setActiveTab }) {
   // Role akun: 'user' (Pembeli / Konsumen) atau 'pelaku' (Pelaku UMKM)
   const [accountType, setAccountType] = useState('user');
 
@@ -96,24 +96,6 @@ export default function Daftar({ onAddUMKM, onRegisterUser, setActiveTab }) {
       date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
     };
 
-    // Jika mendaftar sebagai Pelaku Usaha, daftarkan juga data UMKM-nya
-    if (accountType === 'pelaku' && onAddUMKM) {
-      const newUMKM = {
-        id: Date.now(),
-        nama: formData.namaUsaha.trim(),
-        pemilik: formData.name.trim(),
-        kategori: formData.kategori,
-        lokasi: formData.lokasi.trim(),
-        kontak: formData.phone.trim() || '+62 812-0000-0000',
-        deskripsi: formData.deskripsiUsaha.trim() || `Produk berkualitas dari ${formData.namaUsaha.trim()}.`,
-        gambar: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80',
-        rating: 5.0,
-        ulasan: 1,
-        status: 'Aktif'
-      };
-      onAddUMKM(newUMKM);
-    }
-
     if (onRegisterUser) {
       onRegisterUser(newUser);
     }
@@ -158,20 +140,32 @@ export default function Daftar({ onAddUMKM, onRegisterUser, setActiveTab }) {
                 <span className="font-bold text-emerald-600">{createdUser.usaha}</span>
               </div>
             )}
+            <div className="p-2.5 bg-blue-50/70 rounded-xl border border-blue-100 text-blue-700 text-[11px] mt-2">
+              💡 <strong>Katalog Anda saat ini masih kosong.</strong> Anda dapat mulai menambahkan produk atau katalog usaha Anda di halaman User Portal.
+            </div>
           </div>
 
           <div className="pt-2 flex flex-col gap-3">
+            {onDirectLogin && (
+              <button
+                onClick={() => onDirectLogin(createdUser)}
+                className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md shadow-blue-500/20 transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>Buka Katalog Anda & Tambah Produk</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
+
             <button
               onClick={() => setActiveTab('Masuk')}
-              className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md shadow-blue-500/20 transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
             >
-              <span>Masuk ke Akun Sekarang</span>
-              <ArrowRight className="w-4 h-4" />
+              Masuk ke Halaman Login
             </button>
 
             <button
               onClick={() => setActiveTab('UMKM')}
-              className="w-full py-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
+              className="w-full py-2.5 text-slate-500 hover:text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
             >
               Jelajahi Direktori UMKM
             </button>
