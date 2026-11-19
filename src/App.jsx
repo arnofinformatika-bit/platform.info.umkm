@@ -52,6 +52,7 @@ import {
 import NavbarLanding from './components/Navbar';
 import FooterLanding from './components/Footer';
 import BerandaLanding from '../pages/Beranda.js';
+import MaintenanceLanding from '../pages/Maintenance.js';
 import UMKMLanding from '../pages/UMKM.js';
 import KategoriLanding from '../pages/Kategori.js';
 import BeritaEventLanding from '../pages/Berita & Event.js';
@@ -271,19 +272,7 @@ export default function App() {
 
           <main className="flex-1">
             {landingTab === 'Beranda' && (
-              <BerandaLanding
-                umkmList={umkmList}
-                setActiveTab={setLandingTab}
-                setSelectedCategory={(cat) => {
-                  setSelectedCategory(cat);
-                  setLandingTab('UMKM');
-                }}
-                onOpenAdminModal={() => {
-                  setEditingItem(null);
-                  setAdminModalOpen(true);
-                }}
-                onSelectUMKM={(item) => setSelectedUMKM(item)}
-              />
+              <MaintenanceLanding setActiveTab={setLandingTab} />
             )}
 
             {landingTab === 'UMKM' && (

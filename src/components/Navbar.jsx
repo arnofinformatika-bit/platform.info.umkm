@@ -43,7 +43,12 @@ export default function Navbar({
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xs">
+    <>
+      <div className="bg-amber-500 text-slate-950 text-[11px] sm:text-xs font-bold py-1.5 px-4 text-center flex items-center justify-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-slate-950 animate-pulse"></span>
+        <span>Pemberitahuan: Server sedang dalam pemeliharaan (maintenance) sistem.</span>
+      </div>
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
@@ -311,5 +316,6 @@ export default function Navbar({
         </div>
       )}
     </header>
+    </>
   );
 }
