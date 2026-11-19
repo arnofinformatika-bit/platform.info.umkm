@@ -91,7 +91,7 @@ export default function UserKatalog({
       nama: userAuth?.usaha && userAuth.usaha !== '-' ? userAuth.usaha : '',
       kategori: 'Makanan & Minuman',
       harga: 'Rp 25.000',
-      lokasi: 'Yogyakarta',
+      lokasi: 'Bandar Lampung',
       kontak: userAuth?.phone && userAuth.phone !== '-' ? userAuth.phone : '+62 812-3456-7890',
       deskripsi: '',
       gambar: presetImages[0].url
@@ -430,7 +430,7 @@ export default function UserKatalog({
                   <input
                     type="text"
                     required
-                    placeholder="Contoh: Yogyakarta / Bandung"
+                    placeholder="Contoh: Bandar Lampung / Jakarta"
                     value={formData.lokasi}
                     onChange={(e) => setFormData({ ...formData, lokasi: e.target.value })}
                     className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"

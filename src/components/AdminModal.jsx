@@ -125,7 +125,7 @@ export default function AdminModal({ isOpen, onClose, onSave, editingItem }) {
                 required
                 value={formData.lokasi}
                 onChange={(e) => setFormData({ ...formData, lokasi: e.target.value })}
-                placeholder="Contoh: Yogyakarta / Semarang"
+                placeholder="Contoh: Bandar Lampung / Jakarta"
                 className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
               />
             </div>

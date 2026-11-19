@@ -1,6 +1,22 @@
 import React from 'react';
 import { Store, Leaf, Heart, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
 
+const InstagramIcon = ({ className = "w-4 h-4" }) => (
+  <svg 
+    className={className} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
+
 export default function Footer({ setActiveTab }) {
   return (
     <footer className="bg-slate-900 text-slate-400 text-sm border-t border-slate-800">
@@ -91,7 +107,18 @@ export default function Footer({ setActiveTab }) {
               </div>
               <div className="flex items-start gap-2">
                 <MapPin className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
-                <span>Yogyakarta, Indonesia</span>
+                <span>Bandar Lampung, Indonesia</span>
+              </div>
+              <div className="pt-1">
+                <a
+                  href="https://www.instagram.com/aditamadevelopment?fqnt=MThtY2dveWZsM2NneA=="
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-slate-300 hover:text-pink-400 transition-colors"
+                >
+                  <InstagramIcon className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+                  <span>@aditamadevelopment</span>
+                </a>
               </div>
             </div>
           </div>

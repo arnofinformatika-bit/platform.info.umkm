@@ -414,7 +414,7 @@ export default function Daftar({ onAddUMKM, onRegisterUser, onDirectLogin, setAc
                         name="lokasi"
                         value={formData.lokasi}
                         onChange={handleChange}
-                        placeholder="Contoh: Yogyakarta, Solo, Surabaya"
+                        placeholder="Contoh: Bandar Lampung, Jakarta, Surabaya"
                         className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
                         required
                       />

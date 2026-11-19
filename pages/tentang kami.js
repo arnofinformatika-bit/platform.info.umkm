@@ -13,6 +13,22 @@ import {
   Store
 } from 'lucide-react';
 
+const InstagramIcon = ({ className = "w-5 h-5" }) => (
+  <svg 
+    className={className} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
+
 export default function TentangKami({ setActiveTab }) {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
@@ -112,7 +128,7 @@ export default function TentangKami({ setActiveTab }) {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
                 <Phone className="w-5 h-5" />
@@ -139,9 +155,24 @@ export default function TentangKami({ setActiveTab }) {
               </div>
               <div>
                 <div className="text-xs text-slate-400">Kantor Sekretariat</div>
-                <div className="text-sm font-bold text-slate-800">Yogyakarta, Indonesia</div>
+                <div className="text-sm font-bold text-slate-800">Bandar Lampung, Indonesia</div>
               </div>
             </div>
+
+            <a
+              href="https://www.instagram.com/aditamadevelopment?fqnt=MThtY2dveWZsM2NneA=="
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3 hover:bg-pink-50/50 hover:border-pink-200 transition-all cursor-pointer group"
+            >
+              <div className="w-10 h-10 rounded-lg bg-pink-100 text-pink-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                <InstagramIcon className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-xs text-slate-400">Instagram Resmi</div>
+                <div className="text-sm font-bold text-slate-800 group-hover:text-pink-600 transition-colors">@aditamadevelopment</div>
+              </div>
+            </a>
           </div>
         </div>
 
