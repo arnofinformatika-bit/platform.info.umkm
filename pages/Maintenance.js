@@ -274,7 +274,7 @@ export default function Maintenance({ usersList = [], onLoginAdmin }) {
 
       {/* FOOTER */}
       <footer className="relative z-20 border-t border-slate-800/80 bg-slate-950/80 px-4 py-4 text-center text-xs text-slate-500">
-        <p>Kantor Sekretariat: Bandar Lampung, Indonesia • © 2026 InfoUMKM. Seluruh hak cipta dilindungi.</p>
+        <p>Pengembang ARNOF DWI FERDIZA: Bandar Lampung, Indonesia • © 2026 InfoUMKM. Seluruh hak cipta dilindungi.</p>
       </footer>
 
       {/* MODAL LOGIN KHUSUS ADMINISTRATOR */}
