@@ -16,12 +16,14 @@ import {
   Award
 } from 'lucide-react';
 
-export default function Beranda({ umkmList, setActiveTab, setSelectedCategory, onOpenAdminModal, onSelectUMKM }) {
+export default function Beranda({ umkmList, setActiveTab, setSelectedCategory, onOpenAdminModal, onSelectUMKM, onSearch }) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
+    if (onSearch) {
+      onSearch(searchQuery.trim());
+    } else if (searchQuery.trim()) {
       setActiveTab('UMKM');
     }
   };
@@ -156,7 +158,7 @@ export default function Beranda({ umkmList, setActiveTab, setSelectedCategory, o
                   {/* Bottom Counter bar */}
                   <div className="bg-slate-900/85 text-white backdrop-blur-md rounded-xl p-3 flex justify-around text-center">
                     <div>
-                      <div className="text-base font-bold text-blue-400">{(umkmList || []).length}+</div>
+                      <div className="text-base font-bold text-blue-400">{(umkmList || []).length}</div>
                       <div className="text-[11px] text-slate-300">UMKM Aktif</div>
                     </div>
                     <div className="w-px bg-slate-700"></div>
@@ -205,66 +207,76 @@ export default function Beranda({ umkmList, setActiveTab, setSelectedCategory, o
           </div>
         </div>
 
-        {/* Grid 5 Kolom Sesuai Tangkapan Layar */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
-          {displayedUMKM.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => onSelectUMKM(item)}
-              className="group bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 flex flex-col cursor-pointer transform hover:-translate-y-1"
-            >
-              {/* Gambar & Badge Status */}
-              <div className="relative h-44 w-full overflow-hidden bg-slate-100">
-                <img
-                  src={item.gambar}
-                  alt={item.nama}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    e.target.src = "https://images.unsplash.com/photo-1581783342308-f792dbdd27c5?auto=format&fit=crop&w=600&q=80";
-                  }}
-                />
-                {/* Badge Aktif Hijau di Pojok Kanan Atas */}
-                <div className="absolute top-3 right-3 bg-emerald-600/90 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm">
-                  {item.status || "Aktif"}
+        {/* Grid 5 Kolom atau Empty State jika Belum Ada Data */}
+        {displayedUMKM.length === 0 ? (
+          <div className="text-center py-12 px-4 bg-white rounded-2xl border border-dashed border-slate-300">
+            <Store className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-slate-700">Belum Ada Data UMKM</h3>
+            <p className="text-sm text-slate-500 max-w-sm mx-auto mt-1">
+              Saat ini belum ada data UMKM yang terdaftar. Data yang ditambahkan oleh pengguna akan otomatis tampil di sini.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+            {displayedUMKM.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => onSelectUMKM(item)}
+                className="group bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 flex flex-col cursor-pointer transform hover:-translate-y-1"
+              >
+                {/* Gambar & Badge Status */}
+                <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+                  <img
+                    src={item.gambar}
+                    alt={item.nama}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      e.target.src = "https://images.unsplash.com/photo-1581783342308-f792dbdd27c5?auto=format&fit=crop&w=600&q=80";
+                    }}
+                  />
+                  {/* Badge Aktif Hijau di Pojok Kanan Atas */}
+                  <div className="absolute top-3 right-3 bg-emerald-600/90 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm">
+                    {item.status || "Aktif"}
+                  </div>
+                </div>
+
+                {/* Card Body */}
+                <div className="p-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-base group-hover:text-blue-600 transition-colors line-clamp-1">
+                      {item.nama}
+                    </h3>
+
+                    {/* Kategori */}
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-2">
+                      <Tag className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="truncate">{item.kategori}</span>
+                    </div>
+
+                    {/* Lokasi */}
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="truncate">{item.lokasi}</span>
+                    </div>
+                  </div>
+
+                  {/* Rating & Action Arrow */}
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-xs">
+                      <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                      <span className="font-bold text-slate-800">{item.rating}</span>
+                      <span className="text-slate-400">({item.ulasan} ulasan)</span>
+                    </div>
+
+                    <div className="w-7 h-7 rounded-full bg-slate-100 group-hover:bg-blue-600 group-hover:text-white text-slate-500 flex items-center justify-center transition-colors">
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {/* Card Body */}
-              <div className="p-4 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="font-bold text-slate-900 text-base group-hover:text-blue-600 transition-colors line-clamp-1">
-                    {item.nama}
-                  </h3>
-
-                  {/* Kategori */}
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-2">
-                    <Tag className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate">{item.kategori}</span>
-                  </div>
-
-                  {/* Lokasi */}
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate">{item.lokasi}</span>
-                  </div>
-                </div>
-
-                {/* Rating & Action Arrow */}
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-xs">
-                    <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                    <span className="font-bold text-slate-800">{item.rating}</span>
-                    <span className="text-slate-400">({item.ulasan} ulasan)</span>
-                  </div>
-
-                  <div className="w-7 h-7 rounded-full bg-slate-100 group-hover:bg-blue-600 group-hover:text-white text-slate-500 flex items-center justify-center transition-colors">
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* QUICK CATEGORY HIGHLIGHT */}

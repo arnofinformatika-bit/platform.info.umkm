@@ -30,7 +30,8 @@ import {
   Database,
   Cloud,
   RefreshCw,
-  CheckCircle2
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 
 // Modals
@@ -52,7 +53,6 @@ import {
 import NavbarLanding from './components/Navbar';
 import FooterLanding from './components/Footer';
 import BerandaLanding from '../pages/Beranda.js';
-import MaintenanceLanding from '../pages/Maintenance.js';
 import UMKMLanding from '../pages/UMKM.js';
 import KategoriLanding from '../pages/Kategori.js';
 import BeritaEventLanding from '../pages/Berita & Event.js';
@@ -77,19 +77,50 @@ import PengaturanAdmin from '../admin/pengaturan.js';
 
 import { initialUMKMData, getStoredUMKM, saveStoredUMKM } from './data/initialData';
 
-export default function App() {
-  // Mode tampilan: 'landing' (Bawaan Utama), 'user' (User Portal), 'admin' (Admin Panel)
-  const [currentMode, setCurrentMode] = useState('landing');
+// Helper pembaca localStorage yang aman
+const getStorageItem = (key, fallback) => {
+  try {
+    const item = localStorage.getItem(key);
+    return item !== null ? item : fallback;
+  } catch (e) {
+    return fallback;
+  }
+};
 
-  // Tab di Landing Page Utama
-  const [landingTab, setLandingTab] = useState('Beranda');
+const getStorageJSON = (key, fallback) => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+};
+
+export default function App() {
+  // Auth Pengguna (disimpan ke localStorage agar login tetap terjaga saat refresh)
+  const [userAuth, setUserAuth] = useState(() => getStorageJSON('infoumkm_user_auth', null));
+
+  // Mode tampilan: 'landing' (Bawaan Utama), 'user' (User Portal), 'admin' (Admin Panel)
+  // Disimpan ke localStorage agar saat refresh halaman TIDAK reset ke awal lagi
+  const [currentMode, setCurrentMode] = useState(() => {
+    const saved = getStorageItem('infoumkm_current_mode', 'landing');
+    const savedAuth = getStorageJSON('infoumkm_user_auth', null);
+    // Jika tersimpan mode user/admin tapi belum login, kembalikan ke landing
+    if ((saved === 'user' || saved === 'admin') && !savedAuth) {
+      return 'landing';
+    }
+    return saved;
+  });
+
+  // Tab di Landing Page Utama (disimpan ke localStorage agar tetap di tab yang sama saat refresh)
+  const [landingTab, setLandingTab] = useState(() => getStorageItem('infoumkm_landing_tab', 'Beranda'));
   const [selectedCategory, setSelectedCategory] = useState('Semua');
 
-  // Tab di User Portal
-  const [activeUserTab, setActiveUserTab] = useState('beranda');
+  // Tab di User Portal (disimpan ke localStorage agar tab yang dibuka tetap aktif saat refresh)
+  const [activeUserTab, setActiveUserTab] = useState(() => getStorageItem('infoumkm_active_user_tab', 'beranda'));
 
-  // Tab di Admin Panel
-  const [activeAdminTab, setActiveAdminTab] = useState('dashboard');
+  // Tab di Admin Panel (disimpan ke localStorage agar tab yang dibuka tetap aktif saat refresh)
+  const [activeAdminTab, setActiveAdminTab] = useState(() => getStorageItem('infoumkm_active_admin_tab', 'dashboard'));
 
   // State untuk Bottom Sheet "Menu Lainnya" di mobile (menggantikan sidebar & garis tiga)
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -98,12 +129,91 @@ export default function App() {
   const [selectedUMKM, setSelectedUMKM] = useState(null);
   const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [userAuth, setUserAuth] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [landingSearchTerm, setLandingSearchTerm] = useState('');
+
+  // Toast Notification In-App Elegan (Menggantikan popup bawaan browser)
+  const [toast, setToast] = useState(null);
+
+  const showNotification = (message, type = 'success') => {
+    setToast({ message, type, id: Date.now() });
+  };
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   // Firebase Realtime State & Status
   const [firebaseStatus, setFirebaseStatus] = useState({ connected: false, error: null });
   const [isFirebaseSyncing, setIsFirebaseSyncing] = useState(false);
+
+  // Simpan auth dan posisi navigasi ke localStorage secara otomatis
+  useEffect(() => {
+    try {
+      if (userAuth) {
+        localStorage.setItem('infoumkm_user_auth', JSON.stringify(userAuth));
+      } else {
+        localStorage.removeItem('infoumkm_user_auth');
+      }
+    } catch (e) {
+      console.warn('Gagal menyimpan userAuth ke localStorage:', e);
+    }
+  }, [userAuth]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('infoumkm_current_mode', currentMode);
+    } catch (e) {
+      console.warn('Gagal menyimpan currentMode ke localStorage:', e);
+    }
+  }, [currentMode]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('infoumkm_active_user_tab', activeUserTab);
+    } catch (e) {
+      console.warn('Gagal menyimpan activeUserTab ke localStorage:', e);
+    }
+  }, [activeUserTab]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('infoumkm_active_admin_tab', activeAdminTab);
+    } catch (e) {
+      console.warn('Gagal menyimpan activeAdminTab ke localStorage:', e);
+    }
+  }, [activeAdminTab]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('infoumkm_landing_tab', landingTab);
+    } catch (e) {
+      console.warn('Gagal menyimpan landingTab ke localStorage:', e);
+    }
+  }, [landingTab]);
+
+  // Fungsi Keluar / Logout Bersih
+  const handleLogout = () => {
+    setUserAuth(null);
+    setCurrentMode('landing');
+    setLandingTab('Beranda');
+    setActiveUserTab('beranda');
+    setActiveAdminTab('dashboard');
+    try {
+      localStorage.removeItem('infoumkm_user_auth');
+      localStorage.setItem('infoumkm_current_mode', 'landing');
+      localStorage.setItem('infoumkm_landing_tab', 'Beranda');
+      localStorage.setItem('infoumkm_active_user_tab', 'beranda');
+      localStorage.setItem('infoumkm_active_admin_tab', 'dashboard');
+    } catch (e) {
+      console.warn('Gagal membersihkan localStorage saat logout:', e);
+    }
+  };
 
   // Data Pengguna Terdaftar (disinkronkan dengan Firebase)
   const [usersList, setUsersList] = useState([
@@ -124,7 +234,7 @@ export default function App() {
     // 2. Berlangganan data UMKM dari Firebase
     const unsubUMKM = subscribeUMKM(
       (firebaseItems) => {
-        if (firebaseItems && firebaseItems.length > 0) {
+        if (Array.isArray(firebaseItems)) {
           setUmkmList(firebaseItems);
           saveStoredUMKM(firebaseItems);
         }
@@ -193,18 +303,22 @@ export default function App() {
     }
   };
 
-  // Reset Data ke Kondisi Awal Dummy + Sinkronkan ke Firebase
+  // Reset Data UMKM
   const handleResetData = async () => {
-    if (window.confirm('Kembalikan seluruh data UMKM ke dummy awal dan sinkronkan ke Firebase?')) {
+    if (window.confirm('Kosongkan seluruh data UMKM dan sinkronkan ke Firebase?')) {
       setIsFirebaseSyncing(true);
-      setUmkmList(initialUMKMData);
-      saveStoredUMKM(initialUMKMData);
+      setUmkmList([]);
+      saveStoredUMKM([]);
 
       try {
-        await seedInitialUMKMToFirebase(true);
-        alert('Data UMKM berhasil direset dan disinkronkan ke Firebase Database!');
+        if (typeof deleteUMKMFromFirebase === 'function') {
+          for (const item of umkmList) {
+            await deleteUMKMFromFirebase(item.id);
+          }
+        }
+        showNotification('Seluruh data UMKM berhasil dikosongkan!', 'success');
       } catch (e) {
-        alert('Data lokal berhasil direset. (' + e.message + ')');
+        showNotification('Data lokal berhasil dikosongkan. (' + e.message + ')', 'info');
       } finally {
         setIsFirebaseSyncing(false);
       }
@@ -218,9 +332,9 @@ export default function App() {
       for (const item of umkmList) {
         await saveUMKMToFirebase(item);
       }
-      alert(`Berhasil menyinkronkan seluruh data UMKM (${umkmList.length} usaha) ke Firebase Database!`);
+      showNotification(`Berhasil menyinkronkan seluruh data UMKM (${umkmList.length} usaha) ke Firebase Database!`, 'success');
     } catch (e) {
-      alert('Gagal menyinkronkan ke Firebase: ' + e.message);
+      showNotification('Gagal menyinkronkan ke Firebase: ' + e.message, 'error');
     } finally {
       setIsFirebaseSyncing(false);
     }
@@ -249,31 +363,393 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased selection:bg-blue-600 selection:text-white">
 
       {/* ============================================================== */}
-      {/* 1. TAMPILAN MAINTENANCE MENYELURUH (SEMUA HALAMAN TIDAK DAPAT DIAKSES) */}
+      {/* 1. TAMPILAN PERTAMA (LANDING PAGE UTAMA - PERSIS FOTO AWAL)     */}
       {/* ============================================================== */}
       {currentMode === 'landing' && (
-        <MaintenanceLanding
-          usersList={usersList}
-          onLoginAdmin={(adminUser) => {
-            setUserAuth(adminUser);
-            setCurrentMode('admin');
-            setActiveAdminTab('dashboard');
-          }}
-        />
+        <div className="flex flex-col min-h-screen pb-16 md:pb-0">
+          <NavbarLanding
+            activeTab={landingTab}
+            setActiveTab={setLandingTab}
+            user={userAuth}
+            onLogout={handleLogout}
+            onOpenAdminModal={() => {
+              setEditingItem(null);
+              setAdminModalOpen(true);
+            }}
+            setSelectedCategory={(cat) => {
+              setSelectedCategory(cat);
+              setLandingTab('UMKM');
+            }}
+            onOpenAdminPanel={() => setCurrentMode('admin')}
+            onOpenUserPortal={() => setCurrentMode('user')}
+          />
+
+          <main className="flex-1">
+            {landingTab === 'Beranda' && (
+              <BerandaLanding
+                umkmList={umkmList}
+                setActiveTab={setLandingTab}
+                setSelectedCategory={(cat) => {
+                  setSelectedCategory(cat);
+                  setLandingSearchTerm('');
+                  setLandingTab('UMKM');
+                }}
+                onSearch={(term) => {
+                  setLandingSearchTerm(term);
+                  setSelectedCategory('Semua');
+                  setLandingTab('UMKM');
+                }}
+                onOpenAdminModal={() => {
+                  setEditingItem(null);
+                  setAdminModalOpen(true);
+                }}
+                onSelectUMKM={(item) => setSelectedUMKM(item)}
+              />
+            )}
+
+            {landingTab === 'UMKM' && (
+              <UMKMLanding
+                umkmList={umkmList}
+                initialCategoryFilter={selectedCategory}
+                initialSearchTerm={landingSearchTerm}
+                onOpenAdminModal={() => {
+                  setEditingItem(null);
+                  setAdminModalOpen(true);
+                }}
+                onEditUMKM={(item) => {
+                  setEditingItem(item);
+                  setAdminModalOpen(true);
+                }}
+                onDeleteUMKM={handleDeleteUMKM}
+                onResetData={handleResetData}
+                onSelectUMKM={(item) => setSelectedUMKM(item)}
+                showToast={showNotification}
+              />
+            )}
+
+            {landingTab === 'Kategori' && (
+              <KategoriLanding
+                umkmList={umkmList}
+                onSelectCategory={(cat) => {
+                  setSelectedCategory(cat);
+                  setLandingTab('UMKM');
+                }}
+                setActiveTab={setLandingTab}
+              />
+            )}
+
+            {landingTab === 'Berita & Event' && (
+              <BeritaEventLanding />
+            )}
+
+            {landingTab === 'Tentang Kami' && (
+              <TentangKamiLanding setActiveTab={setLandingTab} />
+            )}
+
+            {landingTab === 'Daftar' && (
+              <DaftarLanding
+                onRegisterUser={handleRegisterUser}
+                onDirectLogin={(user) => {
+                  setUserAuth(user);
+                  setCurrentMode('user');
+                  setActiveUserTab('katalog');
+                }}
+                onAddUMKM={(newItem) => {
+                  handleSaveUMKM(newItem);
+                }}
+                setActiveTab={setLandingTab}
+              />
+            )}
+
+            {landingTab === 'Masuk' && (
+              <MasukLanding
+                usersList={usersList}
+                onLoginSuccess={(user) => {
+                  setUserAuth(user);
+                  const normalizedRole = (user.role || '').toLowerCase();
+                  const normalizedEmail = (user.email || '').toLowerCase();
+                  if (normalizedRole === 'admin' || normalizedRole === 'administrator' || normalizedEmail === 'arnof@gmail.com') {
+                    setCurrentMode('admin');
+                  } else {
+                    setCurrentMode('user');
+                  }
+                }}
+                setActiveTab={setLandingTab}
+              />
+            )}
+          </main>
+
+          <FooterLanding setActiveTab={setLandingTab} />
+
+          {/* MOBILE BOTTOM TAB BAR UNTUK LANDING PAGE */}
+          <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1.5 px-3 flex justify-around items-center md:hidden shadow-lg">
+            <button
+              onClick={() => setLandingTab('Beranda')}
+              className={`flex flex-col items-center py-1 px-2 text-[10px] font-bold cursor-pointer transition-colors ${
+                landingTab === 'Beranda' ? 'text-blue-600' : 'text-slate-500'
+              }`}
+            >
+              <Home className="w-5 h-5 mb-0.5" />
+              <span>Beranda</span>
+            </button>
+
+            <button
+              onClick={() => setLandingTab('UMKM')}
+              className={`flex flex-col items-center py-1 px-2 text-[10px] font-bold cursor-pointer transition-colors ${
+                landingTab === 'UMKM' ? 'text-blue-600' : 'text-slate-500'
+              }`}
+            >
+              <Store className="w-5 h-5 mb-0.5" />
+              <span>UMKM</span>
+            </button>
+
+            <button
+              onClick={() => setLandingTab('Kategori')}
+              className={`flex flex-col items-center py-1 px-2 text-[10px] font-bold cursor-pointer transition-colors ${
+                landingTab === 'Kategori' ? 'text-blue-600' : 'text-slate-500'
+              }`}
+            >
+              <Tag className="w-5 h-5 mb-0.5" />
+              <span>Kategori</span>
+            </button>
+
+            <button
+              onClick={() => setLandingTab('Berita & Event')}
+              className={`flex flex-col items-center py-1 px-2 text-[10px] font-bold cursor-pointer transition-colors ${
+                landingTab === 'Berita & Event' ? 'text-blue-600' : 'text-slate-500'
+              }`}
+            >
+              <Calendar className="w-5 h-5 mb-0.5" />
+              <span>Event</span>
+            </button>
+
+            <button
+              onClick={() => setLandingTab('Masuk')}
+              className={`flex flex-col items-center py-1 px-2 text-[10px] font-bold cursor-pointer transition-colors ${
+                landingTab === 'Masuk' ? 'text-blue-600' : 'text-slate-500'
+              }`}
+            >
+              <User className="w-5 h-5 mb-0.5" />
+              <span>Masuk</span>
+            </button>
+          </nav>
+        </div>
       )}
 
       {/* ============================================================== */}
-      {/* 2. TAMPILAN USER (DINONAKTIFKAN SELAMA MAINTENANCE SERVER)     */}
+      {/* 2. TAMPILAN USER (PORTAL DENGAN DESKTOP SIDEBAR + MOBILE TABS) */}
       {/* ============================================================== */}
       {currentMode === 'user' && (
-        <MaintenanceLanding
-          usersList={usersList}
-          onLoginAdmin={(adminUser) => {
-            setUserAuth(adminUser);
-            setCurrentMode('admin');
-            setActiveAdminTab('dashboard');
-          }}
-        />
+        <div className="flex min-h-screen relative pb-16 md:pb-0">
+          
+          {/* User Sidebar: HANYA TAMPIL DI DESKTOP (md:flex), TIDAK MENUMPUK DI MOBILE */}
+          <aside className="hidden md:flex md:w-64 bg-white border-r border-slate-200/90 shrink-0 p-5 flex-col justify-between">
+            <div className="space-y-6">
+              
+              <div 
+                onClick={() => setCurrentMode('landing')}
+                className="flex items-center gap-3 select-none cursor-pointer group"
+                title="Kembali ke Beranda Utama"
+              >
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 shadow-2xs group-hover:scale-105 transition-transform">
+                    <Store className="w-5 h-5 stroke-[2.2]" />
+                  </div>
+                  <div className="absolute -bottom-1 -left-1 bg-white rounded-full p-0.5">
+                    <Leaf className="w-3.5 h-3.5 text-emerald-500 fill-emerald-500 transform -rotate-12" />
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-baseline text-xl font-black tracking-tight leading-none">
+                    <span className="text-blue-600">Info</span>
+                    <span className="text-slate-900">UMKM</span>
+                  </div>
+                  <p className="text-[11px] font-bold text-blue-600 mt-1 truncate max-w-[140px]" title={userAuth?.name || 'User Portal'}>
+                    {userAuth?.name || 'User Portal'}
+                  </p>
+                </div>
+              </div>
+
+              <nav className="space-y-1">
+                {userMenuItems.map((item) => {
+                  const isActive = activeUserTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveUserTab(item.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-bold text-sm transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-blue-100/70 text-blue-700 shadow-2xs'
+                          : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+
+            </div>
+
+            <div className="pt-6 space-y-3">
+              <div className="rounded-2xl p-4 bg-gradient-to-b from-blue-50 via-sky-50 to-indigo-50 border border-blue-100 text-slate-700 space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                  <span className="text-xs font-black text-slate-900 leading-tight">Dukung UMKM<br />Indonesia</span>
+                </div>
+                <p className="text-[11px] text-slate-500 leading-tight">
+                  Belanja Lokal, Bangkitkan Ekonomi Negeri
+                </p>
+                <div className="flex items-center justify-between pt-1 text-[11px] text-slate-400">
+                  <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+                  <span>#BanggaBuatanID</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setCurrentMode('landing')}
+                className="w-full py-2 px-3 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Ke Beranda Utama</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="w-full py-2 px-3 rounded-xl border border-rose-200 bg-rose-50/50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Keluar Akun</span>
+              </button>
+            </div>
+          </aside>
+
+          {/* User Content */}
+          <div className="flex-1 flex flex-col min-w-0">
+            {/* Header: Bersih tanpa garis tiga di mobile */}
+            <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-3">
+              <div className="relative flex-1 max-w-md">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Cari UMKM, produk..."
+                  className="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    title="Hapus pencarian"
+                    className="absolute right-2.5 top-2.5 p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button className="relative p-2 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition-colors">
+                  <Bell className="w-5 h-5" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500"></span>
+                </button>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    {userAuth?.name ? userAuth.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                  <span className="text-xs font-bold text-slate-800 hidden sm:block">
+                    {userAuth?.name || 'Pengguna'}
+                  </span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  title="Keluar / Logout"
+                  className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-semibold ml-1"
+                >
+                  <LogOut className="w-4 h-4 text-rose-500" />
+                  <span className="hidden sm:inline">Keluar</span>
+                </button>
+              </div>
+            </header>
+
+            <div className="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto">
+              {activeUserTab === 'beranda' && (
+                <UserBeranda
+                  umkmList={umkmList}
+                  userAuth={userAuth}
+                  setActiveUserTab={setActiveUserTab}
+                  onSelectUMKM={(item) => setSelectedUMKM(item)}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  onSwitchToAdmin={() => setCurrentMode('admin')}
+                />
+              )}
+
+              {activeUserTab === 'katalog' && (
+                <UserKatalog
+                  umkmList={umkmList}
+                  userAuth={userAuth}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  onSaveUMKM={handleSaveUMKM}
+                  onDeleteUMKM={handleDeleteUMKM}
+                  onSelectUMKM={(item) => setSelectedUMKM(item)}
+                  showToast={showNotification}
+                />
+              )}
+
+              {activeUserTab === 'informasi' && (
+                <UserInformasi searchQuery={searchQuery} />
+              )}
+            </div>
+          </div>
+
+          {/* MOBILE BOTTOM TAB BAR UNTUK USER PORTAL (DENGAN TOMBOL LAINNYA) */}
+          <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1.5 px-3 flex justify-around items-center md:hidden shadow-lg">
+            <button
+              onClick={() => setActiveUserTab('beranda')}
+              className={`flex flex-col items-center py-1 px-2 text-[10px] font-bold cursor-pointer transition-colors ${
+                activeUserTab === 'beranda' ? 'text-blue-600' : 'text-slate-500'
+              }`}
+            >
+              <Home className="w-5 h-5 mb-0.5" />
+              <span>Beranda</span>
+            </button>
+
+            <button
+              onClick={() => setActiveUserTab('katalog')}
+              className={`flex flex-col items-center py-1 px-2 text-[10px] font-bold cursor-pointer transition-colors ${
+                activeUserTab === 'katalog' ? 'text-blue-600' : 'text-slate-500'
+              }`}
+            >
+              <Store className="w-5 h-5 mb-0.5" />
+              <span>Data UMKM Anda</span>
+            </button>
+
+            <button
+              onClick={() => setActiveUserTab('informasi')}
+              className={`flex flex-col items-center py-1 px-2 text-[10px] font-bold cursor-pointer transition-colors ${
+                activeUserTab === 'informasi' ? 'text-blue-600' : 'text-slate-500'
+              }`}
+            >
+              <Info className="w-5 h-5 mb-0.5" />
+              <span>Informasi</span>
+            </button>
+
+            {/* Menu Lainnya */}
+            <button
+              onClick={() => setMoreMenuOpen(true)}
+              className="flex flex-col items-center py-1 px-2 text-[10px] font-bold cursor-pointer text-slate-500 hover:text-blue-600"
+            >
+              <MoreHorizontal className="w-5 h-5 mb-0.5" />
+              <span>Lainnya</span>
+            </button>
+          </nav>
+
+        </div>
       )}
 
       {/* ============================================================== */}
@@ -347,6 +823,13 @@ export default function App() {
                 </div>
                 <span className="text-[10px] bg-slate-900 px-1.5 py-0.5 rounded text-slate-400">Home</span>
               </button>
+              <button
+                onClick={handleLogout}
+                className="w-full py-2.5 px-3.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2 mt-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Keluar dari Admin</span>
+              </button>
             </div>
           </aside>
 
@@ -374,6 +857,14 @@ export default function App() {
                   </div>
                   <span className="text-xs font-bold text-slate-800 hidden sm:block">Admin</span>
                 </div>
+                <button
+                  onClick={handleLogout}
+                  title="Keluar / Logout"
+                  className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-semibold ml-1"
+                >
+                  <LogOut className="w-4 h-4 text-rose-500" />
+                  <span className="hidden sm:inline">Keluar</span>
+                </button>
               </div>
             </header>
 
@@ -510,8 +1001,12 @@ export default function App() {
               <div className="w-12 h-1.5 bg-slate-300 rounded-full mb-3"></div>
               <div className="w-full flex items-center justify-between pb-2 border-b border-slate-100">
                 <div>
-                  <h3 className="font-extrabold text-slate-900 text-base">Menu Lainnya</h3>
-                  <p className="text-[11px] text-slate-400">Akses cepat seluruh fitur dari sidebar</p>
+                  <h3 className="font-extrabold text-slate-900 text-base">
+                    {currentMode === 'user' ? (userAuth?.name || 'Menu Pengguna') : 'Menu Admin'}
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    {currentMode === 'user' ? (userAuth?.email || 'Akun Pengguna Terdaftar') : 'Akses cepat seluruh fitur dari sidebar'}
+                  </p>
                 </div>
                 <button
                   onClick={() => setMoreMenuOpen(false)}
@@ -558,6 +1053,16 @@ export default function App() {
                     <ArrowLeft className="w-4 h-4" />
                     <span>Kembali ke Beranda Utama</span>
                   </button>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setMoreMenuOpen(false);
+                    }}
+                    className="w-full py-2.5 px-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Keluar dari Admin</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -598,6 +1103,16 @@ export default function App() {
                     <ArrowLeft className="w-4 h-4" />
                     <span>Kembali ke Beranda Utama</span>
                   </button>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setMoreMenuOpen(false);
+                    }}
+                    className="w-full py-2.5 px-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Keluar Akun</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -621,6 +1136,45 @@ export default function App() {
         item={selectedUMKM}
         onClose={() => setSelectedUMKM(null)}
       />
+
+      {/* GLOBAL TOAST NOTIFICATION ELEGAN (Menggantikan popup browser alert) */}
+      {toast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] max-w-md w-[92%] sm:w-auto animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto">
+          <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-md ${
+            toast.type === 'error'
+              ? 'bg-rose-900/95 text-white border-rose-700/50 shadow-rose-950/30'
+              : toast.type === 'info'
+              ? 'bg-slate-900/95 text-white border-slate-700/50 shadow-slate-950/30'
+              : 'bg-emerald-900/95 text-white border-emerald-700/50 shadow-emerald-950/30'
+          }`}>
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+              toast.type === 'error'
+                ? 'bg-rose-500 text-white'
+                : toast.type === 'info'
+                ? 'bg-blue-500 text-white'
+                : 'bg-emerald-500 text-white'
+            }`}>
+              {toast.type === 'error' ? (
+                <AlertCircle className="w-4 h-4" />
+              ) : toast.type === 'info' ? (
+                <Info className="w-4 h-4" />
+              ) : (
+                <CheckCircle2 className="w-4 h-4" />
+              )}
+            </div>
+            <div className="flex-1 text-xs sm:text-sm font-semibold leading-snug">
+              {toast.message}
+            </div>
+            <button
+              onClick={() => setToast(null)}
+              className="p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+              title="Tutup notifikasi"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

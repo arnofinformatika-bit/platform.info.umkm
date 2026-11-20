@@ -43,12 +43,7 @@ export default function Navbar({
   ];
 
   return (
-    <>
-      <div className="bg-amber-500 text-slate-950 text-[11px] sm:text-xs font-bold py-1.5 px-4 text-center flex items-center justify-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-slate-950 animate-pulse"></span>
-        <span>Pemberitahuan: Server sedang dalam pemeliharaan (maintenance) sistem.</span>
-      </div>
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xs">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
@@ -196,7 +191,7 @@ export default function Navbar({
                     className="px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
                   >
                     <Store className="w-3.5 h-3.5" />
-                    <span>Portal User</span>
+                    <span>{user.name || 'Portal User'}</span>
                   </button>
                 )}
                 <div className="text-right">
@@ -316,6 +311,5 @@ export default function Navbar({
         </div>
       )}
     </header>
-    </>
   );
 }

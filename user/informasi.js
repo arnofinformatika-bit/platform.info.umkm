@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { beritaEventData } from '../src/data/initialData';
 
-export default function UserInformasi() {
+export default function UserInformasi({ searchQuery = '' }) {
   const [selectedArticle, setSelectedArticle] = useState(null);
 
   const articleGuides = [

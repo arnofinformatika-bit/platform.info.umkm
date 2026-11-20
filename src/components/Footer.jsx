@@ -44,8 +44,11 @@ export default function Footer({ setActiveTab }) {
               Platform direktori nasional yang memfasilitasi publikasi, promosi, dan pendampingan UMKM di seluruh nusantara secara transparan dan terpercaya.
             </p>
 
-            <div className="flex items-center gap-3 text-xs text-slate-400 pt-1">
-              <span>© 2026 InfoUMKM Indonesia. Seluruh hak cipta dilindungi undang-undang.</span>
+            <div className="space-y-1.5 text-xs text-slate-400 pt-1">
+              <p>© 2026 InfoUMKM Indonesia. Seluruh hak cipta dilindungi undang-undang.</p>
+              <p className="text-slate-300 font-medium">
+                Pengembang Sistem: <span className="text-white font-semibold">ARNOF DWI FERDIZA</span>
+              </p>
             </div>
           </div>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   MapPin, 
@@ -11,7 +11,8 @@ import {
   RotateCcw, 
   ExternalLink,
   CheckCircle,
-  Building2
+  Building2,
+  X
 } from 'lucide-react';
 
 export default function UMKM({ 
@@ -21,11 +22,25 @@ export default function UMKM({
   onDeleteUMKM, 
   onResetData, 
   onSelectUMKM,
-  initialCategoryFilter = 'Semua' 
+  initialCategoryFilter = 'Semua',
+  initialSearchTerm = '',
+  showToast
 }) {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [selectedCategory, setSelectedCategory] = useState(initialCategoryFilter);
   const [sortBy, setSortBy] = useState('default');
+
+  useEffect(() => {
+    if (initialSearchTerm !== undefined) {
+      setSearchTerm(initialSearchTerm);
+    }
+  }, [initialSearchTerm]);
+
+  useEffect(() => {
+    if (initialCategoryFilter !== undefined) {
+      setSelectedCategory(initialCategoryFilter);
+    }
+  }, [initialCategoryFilter]);
 
   const categories = [
     'Semua',
@@ -95,8 +110,18 @@ export default function UMKM({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Cari berdasarkan nama UMKM, produk, atau kota..."
-                className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                className="w-full pl-10 pr-9 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  title="Hapus pencarian"
+                  className="absolute right-2.5 top-2.5 p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
 
             {/* Sort Dropdown */}

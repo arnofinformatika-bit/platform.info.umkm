@@ -58,12 +58,32 @@ export const subscribeUMKM = (onSuccess, onError) => {
             }));
           }
           
+          // Bersihkan data dummy (ID 1-8) baik dari tampilan maupun dari Firebase RTDB
+          const dummyNames = [
+            "Batik Nusantara", "Keripik Makmur", "Es Segar Jaya", "Anyaman Kita",
+            "Glow Beauty", "Kopi Senja Merapi", "Gerabah Kasongan Artistik", "Tenun Ikat Sumba Indah"
+          ];
+          const realList = [];
+          list.forEach((item) => {
+            const numId = Number(item.id);
+            const isDummyId = !isNaN(numId) && numId >= 1 && numId <= 8;
+            if (isDummyId && dummyNames.includes(item.nama) && !item.isUserAdded) {
+              try {
+                remove(ref(rtdb, `umkm/${item.id}`));
+              } catch (e) {
+                console.warn('Gagal menghapus data dummy dari RTDB:', item.id, e);
+              }
+            } else {
+              realList.push(item);
+            }
+          });
+
           updateStatus({ connected: true, error: null, lastSync: new Date() });
-          onSuccess(list);
+          onSuccess(realList);
         } else {
-          // Jika kosong di database, otomatis unggah data dummy awal
-          console.log('[Firebase] Node umkm kosong di RTDB, mengunggah data dummy awal...');
-          seedInitialUMKMToFirebase();
+          // Jika kosong di database, biarkan kosong tanpa menyuntikkan dummy
+          updateStatus({ connected: true, error: null, lastSync: new Date() });
+          onSuccess([]);
         }
       },
       (err) => {
@@ -127,6 +147,7 @@ export const deleteUMKMFromFirebase = async (id) => {
  */
 export const seedInitialUMKMToFirebase = async (force = false) => {
   if (!rtdb) return false;
+  if (!initialUMKMData || initialUMKMData.length === 0) return true;
 
   try {
     for (const item of initialUMKMData) {
@@ -136,7 +157,6 @@ export const seedInitialUMKMToFirebase = async (force = false) => {
       });
     }
     updateStatus({ connected: true, error: null, lastSync: new Date() });
-    console.log('[Firebase] Berhasil mengunggah seluruh data UMKM awal ke Realtime Database');
     return true;
   } catch (err) {
     console.error('[Firebase] Gagal seed data awal:', err);

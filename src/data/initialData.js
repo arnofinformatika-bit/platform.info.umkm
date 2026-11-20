@@ -1,102 +1,5 @@
-// Data awal dummy InfoUMKM sesuai tampilan desain
-export const initialUMKMData = [
-  {
-    id: 1,
-    nama: "Batik Nusantara",
-    kategori: "Fashion & Aksesoris",
-    lokasi: "Yogyakarta",
-    rating: 4.8,
-    ulasan: 120,
-    status: "Aktif",
-    deskripsi: "Penyedia batik tulis dan cap khas Yogyakarta dengan motif klasik dan modern berkualitas premium langsung dari pengrajin.",
-    kontak: "+62 812-3456-7890",
-    gambar: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 2,
-    nama: "Keripik Makmur",
-    kategori: "Makanan & Minuman",
-    lokasi: "Surabaya",
-    rating: 4.7,
-    ulasan: 98,
-    status: "Aktif",
-    deskripsi: "Aneka keripik pisang, singkong, dan tempe renyah gurih khas Jawa Timur tanpa bahan pengawet.",
-    kontak: "+62 813-2233-4455",
-    gambar: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 3,
-    nama: "Es Segar Jaya",
-    kategori: "Minuman",
-    lokasi: "Bandung",
-    rating: 4.7,
-    ulasan: 85,
-    status: "Aktif",
-    deskripsi: "Minuman sari buah segar alami dan jus herbal kemasan botol higienis ramah lingkungan.",
-    kontak: "+62 815-9988-7766",
-    gambar: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 4,
-    nama: "Anyaman Kita",
-    kategori: "Kerajinan Tangan",
-    lokasi: "Solo",
-    rating: 4.9,
-    ulasan: 110,
-    status: "Aktif",
-    deskripsi: "Produk kerajinan tas, keranjang, dan hiasan rumah ramah lingkungan dari anyaman bambu & rotan alami.",
-    kontak: "+62 821-4455-6677",
-    gambar: "https://images.unsplash.com/photo-1590736704728-f4730bb30770?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 5,
-    nama: "Glow Beauty",
-    kategori: "Kosmetik & Perawatan",
-    lokasi: "Malang",
-    rating: 4.8,
-    ulasan: 102,
-    status: "Aktif",
-    deskripsi: "Skincare dan perawatan kulit organik berbahan rempah dan ekstrak bunga alami tersertifikasi BPOM.",
-    kontak: "+62 878-1122-3344",
-    gambar: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 6,
-    nama: "Kopi Senja Merapi",
-    kategori: "Makanan & Minuman",
-    lokasi: "Sleman",
-    rating: 4.9,
-    ulasan: 145,
-    status: "Aktif",
-    deskripsi: "Biji kopi Arabika dan Robusta lereng Gunung Merapi dengan aroma khas vulkanik dan cita rasa autentik.",
-    kontak: "+62 812-9876-5432",
-    gambar: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 7,
-    nama: "Gerabah Kasongan Artistik",
-    kategori: "Kerajinan Tangan",
-    lokasi: "Bantul",
-    rating: 4.8,
-    ulasan: 74,
-    status: "Aktif",
-    deskripsi: "Vas bunga, guci, dan peralatan makan tembikar tanah liat dengan sentuhan estetika modern khas Kasongan.",
-    kontak: "+62 856-7890-1234",
-    gambar: "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 8,
-    nama: "Tenun Ikat Sumba Indah",
-    kategori: "Fashion & Aksesoris",
-    lokasi: "Kupang",
-    rating: 5.0,
-    ulasan: 63,
-    status: "Aktif",
-    deskripsi: "Kain tenun ikat tradisional dengan pewarna alami akar kayu dan rempah khas Nusa Tenggara Timur.",
-    kontak: "+62 822-3344-5566",
-    gambar: "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80"
-  }
-];
+// Data awal UMKM InfoUMKM (Kosong default, hanya data riil yang diinput pengguna)
+export const initialUMKMData = [];
 
 export const kategoriList = [
   { id: "all", nama: "Semua Kategori", count: 8, icon: "Store" },
@@ -142,12 +45,31 @@ export const getStoredUMKM = () => {
   try {
     const data = localStorage.getItem('infoumkm_items');
     if (data) {
-      return JSON.parse(data);
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) {
+        const dummyNames = [
+          "Batik Nusantara", "Keripik Makmur", "Es Segar Jaya", "Anyaman Kita",
+          "Glow Beauty", "Kopi Senja Merapi", "Gerabah Kasongan Artistik", "Tenun Ikat Sumba Indah"
+        ];
+        const filtered = parsed.filter(item => {
+          const numId = Number(item.id);
+          const isDummyId = !isNaN(numId) && numId >= 1 && numId <= 8;
+          if (isDummyId && dummyNames.includes(item?.nama) && !item?.isUserAdded) {
+            return false;
+          }
+          return true;
+        });
+
+        if (filtered.length !== parsed.length) {
+          localStorage.setItem('infoumkm_items', JSON.stringify(filtered));
+        }
+        return filtered;
+      }
     }
   } catch (e) {
     console.error("Gagal membaca localStorage:", e);
   }
-  return initialUMKMData;
+  return [];
 };
 
 export const saveStoredUMKM = (items) => {

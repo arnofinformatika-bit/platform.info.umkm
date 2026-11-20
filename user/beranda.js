@@ -55,6 +55,18 @@ export default function UserBeranda({
     return false;
   });
 
+  // Filter dengan searchQuery dari header jika ada
+  const filteredMyUMKM = myUMKM.filter((item) => {
+    if (!searchQuery || !searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      item.nama.toLowerCase().includes(q) ||
+      item.kategori.toLowerCase().includes(q) ||
+      item.lokasi.toLowerCase().includes(q) ||
+      (item.deskripsi && item.deskripsi.toLowerCase().includes(q))
+    );
+  });
+
   const articles = [
     {
       id: 1,
@@ -217,8 +229,20 @@ export default function UserBeranda({
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {myUMKM.map((item) => (
+          <div>
+            {searchQuery && (
+              <div className="mb-4 flex items-center justify-between text-xs text-slate-500">
+                <span>Hasil pencarian untuk: "<strong>{searchQuery}</strong>" ({filteredMyUMKM.length} ditemukan)</span>
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="text-blue-600 hover:underline font-bold cursor-pointer"
+                >
+                  Reset
+                </button>
+              </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {filteredMyUMKM.map((item) => (
               <div
                 key={item.id}
                 onClick={() => onSelectUMKM && onSelectUMKM(item)}
@@ -257,6 +281,7 @@ export default function UserBeranda({
                 </div>
               </div>
             ))}
+            </div>
           </div>
         )}
       </div>
