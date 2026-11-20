@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { getWhatsAppLink } from '../src/utils/phoneUtils';
 import { 
   Plus, 
   Search, 
@@ -455,10 +456,17 @@ export default function UserKatalog({
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                  <a
+                    href={getWhatsAppLink(item.kontak, `Halo ${item.nama}, saya melihat usaha Anda di InfoUMKM`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center gap-1.5 text-xs text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer"
+                    title="Buka WhatsApp Pelaku Usaha"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
                     <span className="text-[11px] font-medium truncate max-w-[120px]">{item.kontak}</span>
-                  </div>
+                  </a>
                   <button 
                     onClick={(e) => handleOpenEdit(item, e)}
                     className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"

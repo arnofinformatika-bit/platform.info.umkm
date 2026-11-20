@@ -100,10 +100,16 @@ export default function Footer({ setActiveTab }) {
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">Hubungi Kami</h4>
             <div className="space-y-2 text-xs">
-              <div className="flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+              <a 
+                href="https://wa.me/6285896611944?text=Halo%20Admin%20InfoUMKM,%20saya%20ingin%20bertanya"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:text-emerald-400 transition-colors"
+                title="Hubungi via WhatsApp"
+              >
+                <Phone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 <span>+62 858-9661-1944</span>
-              </div>
+              </a>
               <div className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                 <span>halo@infoumkm.id</span>

@@ -1,13 +1,16 @@
 import React from 'react';
 import { X, MapPin, Tag, Star, Phone, CheckCircle, ExternalLink, Share2 } from 'lucide-react';
+import { formatWhatsAppNumber, getWhatsAppLink } from '../utils/phoneUtils';
 
 export default function DetailModal({ item, onClose }) {
   if (!item) return null;
 
   const handleWhatsApp = () => {
-    const phone = (item.kontak || '6281234567890').replace(/[^0-9]/g, '');
-    const text = encodeURIComponent(`Halo ${item.nama}, saya melihat profil usaha Anda di InfoUMKM dan tertarik dengan produk Anda.`);
-    window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+    const rawNumber = item.kontak || '085896611944';
+    const waUrl = getWhatsAppLink(rawNumber, `Halo ${item.nama}, saya melihat profil usaha Anda di InfoUMKM dan tertarik dengan produk Anda.`);
+    if (waUrl && waUrl !== '#') {
+      window.open(waUrl, '_blank');
+    }
   };
 
   return (

@@ -129,15 +129,21 @@ export default function TentangKami({ setActiveTab }) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+            <a 
+              href="https://wa.me/6285896611944?text=Halo%20Tim%20InfoUMKM,%20saya%20ingin%20berkonsultasi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3 hover:bg-emerald-50 hover:border-emerald-300 transition-all cursor-pointer group"
+              title="Hubungi via WhatsApp"
+            >
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                 <Phone className="w-5 h-5" />
               </div>
               <div>
                 <div className="text-xs text-slate-400">Call Center / WA</div>
                 <div className="text-sm font-bold text-slate-800">+62 858-9661-1944</div>
               </div>
-            </div>
+            </a>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
