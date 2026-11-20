@@ -154,7 +154,7 @@ export default function TentangKami({ setActiveTab }) {
                 <MapPin className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-xs text-slate-400">Kantor Sekretariat</div>
+                <div className="text-xs text-slate-400">Alamat Pengembang</div>
                 <div className="text-sm font-bold text-slate-800">Bandar Lampung, Indonesia</div>
               </div>
             </div>
