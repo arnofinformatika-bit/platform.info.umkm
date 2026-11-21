@@ -1,7 +1,20 @@
-import React from 'react';
-import { BarChart3, Download, TrendingUp, MapPin, Store, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BarChart3, Download, TrendingUp, MapPin, Store, CheckCircle, Info, X } from 'lucide-react';
 
 export default function LaporanAdmin({ umkmList = [] }) {
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type, id: Date.now() });
+  };
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const kotaRanking = [
     { kota: "Yogyakarta", jumlah: 342, persentase: "27%" },
     { kota: "Surabaya", jumlah: 285, persentase: "23%" },
@@ -11,7 +24,7 @@ export default function LaporanAdmin({ umkmList = [] }) {
   ];
 
   const handleDownload = () => {
-    alert("Laporan platform InfoUMKM (Format PDF/Excel) berhasil digenerate dan siap diunduh.");
+    showToast("Laporan platform InfoUMKM (Format PDF/Excel) berhasil digenerate dan siap diunduh.", "success");
   };
 
   return (
@@ -77,6 +90,29 @@ export default function LaporanAdmin({ umkmList = [] }) {
           ))}
         </div>
       </div>
+
+      {/* TOAST IN-APP (Tanpa alert browser) */}
+      {toast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] max-w-md w-[92%] sm:w-auto animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-md bg-emerald-900/95 text-white border-emerald-700/50 shadow-emerald-950/30">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-emerald-500 text-white">
+              <CheckCircle className="w-4 h-4" />
+            </div>
+            <div className="flex-1 text-xs sm:text-sm font-semibold leading-snug flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/20 text-white shrink-0">
+                Info
+              </span>
+              <span>{toast.message}</span>
+            </div>
+            <button
+              onClick={() => setToast(null)}
+              className="p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

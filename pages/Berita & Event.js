@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Calendar, 
   MapPin, 
@@ -7,13 +7,28 @@ import {
   Sparkles, 
   Bell, 
   Share2, 
-  CheckCircle2 
+  CheckCircle2,
+  Info,
+  AlertCircle,
+  X 
 } from 'lucide-react';
 import { beritaEventData } from '../src/data/initialData';
 
 export default function BeritaEvent() {
   const [activeFilter, setActiveFilter] = useState('Semua');
   const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type, id: Date.now() });
+  };
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const filters = ['Semua', 'Event', 'Berita'];
 
@@ -24,11 +39,11 @@ export default function BeritaEvent() {
 
   const handleRegisterEvent = (id, judul) => {
     if (registeredEvents.includes(id)) {
-      alert(`Anda sudah terdaftar di kegiatan: ${judul}`);
+      showToast(`Anda sudah terdaftar di kegiatan: "${judul}"`, 'info');
       return;
     }
     setRegisteredEvents([...registeredEvents, id]);
-    alert(`Selamat! Anda berhasil mendaftar untuk mengikuti "${judul}". Konfirmasi tiket/link akan dikirimkan.`);
+    showToast(`Selamat! Anda berhasil mendaftar untuk mengikuti "${judul}". Konfirmasi tiket/link akan dikirimkan.`, 'success');
   };
 
   return (
@@ -164,6 +179,48 @@ export default function BeritaEvent() {
         </div>
 
       </div>
+
+      {/* IN-APP TOAST NOTIFICATION ELEGAN (Menggantikan alert bawaan browser) */}
+      {toast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] max-w-md w-[92%] sm:w-auto animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto">
+          <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-md ${
+            toast.type === 'error'
+              ? 'bg-rose-900/95 text-white border-rose-700/50 shadow-rose-950/30'
+              : toast.type === 'info'
+              ? 'bg-slate-900/95 text-white border-slate-700/50 shadow-slate-950/30'
+              : 'bg-emerald-900/95 text-white border-emerald-700/50 shadow-emerald-950/30'
+          }`}>
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+              toast.type === 'error'
+                ? 'bg-rose-500 text-white'
+                : toast.type === 'info'
+                ? 'bg-blue-500 text-white'
+                : 'bg-emerald-500 text-white'
+            }`}>
+              {toast.type === 'error' ? (
+                <AlertCircle className="w-4 h-4" />
+              ) : toast.type === 'info' ? (
+                <Info className="w-4 h-4" />
+              ) : (
+                <CheckCircle2 className="w-4 h-4" />
+              )}
+            </div>
+            <div className="flex-1 text-xs sm:text-sm font-semibold leading-snug flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/20 text-white shrink-0">
+                {toast.type === 'error' ? 'Peringatan' : toast.type === 'info' ? 'Info' : 'Sukses'}
+              </span>
+              <span>{toast.message}</span>
+            </div>
+            <button
+              onClick={() => setToast(null)}
+              className="p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+              title="Tutup notifikasi"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

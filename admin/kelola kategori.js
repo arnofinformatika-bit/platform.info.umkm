@@ -35,9 +35,16 @@ export default function KelolaKategori({ umkmList = [] }) {
     setShowModal(false);
   };
 
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+
   const handleDelete = (id) => {
-    if (window.confirm('Hapus kategori ini?')) {
-      setCategories(categories.filter(c => c.id !== id));
+    setDeleteConfirmId(id);
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirmId) {
+      setCategories(categories.filter(c => c.id !== deleteConfirmId));
+      setDeleteConfirmId(null);
     }
   };
 
@@ -145,6 +152,38 @@ export default function KelolaKategori({ umkmList = [] }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* DIALOG KONFIRMASI HAPUS IN-APP */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-slate-100">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
+              <Trash2 className="w-6 h-6 stroke-[2]" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-extrabold text-slate-900 text-base">Hapus Kategori?</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Apakah Anda yakin ingin menghapus kelompok kategori UMKM ini?
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmId(null)}
+                className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-sm"
+              >
+                Ya, Hapus
+              </button>
+            </div>
           </div>
         </div>
       )}
