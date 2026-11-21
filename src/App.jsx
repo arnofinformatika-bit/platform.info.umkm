@@ -31,7 +31,8 @@ import {
   Cloud,
   RefreshCw,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from 'lucide-react';
 
 // Modals
@@ -46,7 +47,8 @@ import {
   seedInitialUMKMToFirebase, 
   subscribeFirebaseStatus,
   saveUserToFirebase,
-  subscribeUsers
+  subscribeUsers,
+  fetchUMKMOnce
 } from './services/firebaseService';
 
 // TAMPILAN PERTAMA (Landing Page Utama dari folder pages/)
@@ -288,40 +290,50 @@ export default function App() {
     }
   };
 
-  // Hapus UMKM (Menghapus lokal + dari Firebase Database)
-  const handleDeleteUMKM = async (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus data UMKM ini?')) {
-      const updated = umkmList.filter((item) => item.id !== id);
-      setUmkmList(updated);
-      saveStoredUMKM(updated);
+  // State konfirmasi hapus UMKM admin (tanpa dialog browser)
+  const [deleteConfirmUMKMId, setDeleteConfirmUMKMId] = useState(null);
 
-      try {
-        await deleteUMKMFromFirebase(id);
-      } catch (e) {
-        console.warn('Gagal menghapus data dari Firebase:', e);
-      }
-    }
+  // Memicu modal konfirmasi hapus UMKM di admin
+  const handleDeleteUMKM = (id) => {
+    setDeleteConfirmUMKMId(id);
   };
 
-  // Reset Data UMKM
-  const handleResetData = async () => {
-    if (window.confirm('Kosongkan seluruh data UMKM dan sinkronkan ke Firebase?')) {
-      setIsFirebaseSyncing(true);
-      setUmkmList([]);
-      saveStoredUMKM([]);
+  const confirmDeleteUMKM = async () => {
+    if (!deleteConfirmUMKMId) return;
+    const id = deleteConfirmUMKMId;
+    const itemToDelete = umkmList.find((item) => item.id === id);
+    const updated = umkmList.filter((item) => item.id !== id);
+    setUmkmList(updated);
+    saveStoredUMKM(updated);
 
-      try {
-        if (typeof deleteUMKMFromFirebase === 'function') {
-          for (const item of umkmList) {
-            await deleteUMKMFromFirebase(item.id);
-          }
-        }
-        showNotification('Seluruh data UMKM berhasil dikosongkan!', 'success');
-      } catch (e) {
-        showNotification('Data lokal berhasil dikosongkan. (' + e.message + ')', 'info');
-      } finally {
-        setIsFirebaseSyncing(false);
+    try {
+      await deleteUMKMFromFirebase(id);
+    } catch (e) {
+      console.warn('Gagal menghapus data dari Firebase:', e);
+    }
+
+    showNotification(`Data UMKM ${itemToDelete ? `"${itemToDelete.nama}" ` : ''}berhasil dihapus.`, 'info');
+    setDeleteConfirmUMKMId(null);
+  };
+
+  // Refresh Data UMKM (Memuat ulang data terbaru dari database & lokal, TIDAK mengosongkan data)
+  const handleResetData = async () => {
+    setIsFirebaseSyncing(true);
+    try {
+      const latestItems = await fetchUMKMOnce();
+      if (Array.isArray(latestItems)) {
+        setUmkmList(latestItems);
+        saveStoredUMKM(latestItems);
       }
+      showNotification('Data UMKM berhasil di-refresh!', 'info');
+    } catch (e) {
+      const stored = getStoredUMKM();
+      if (Array.isArray(stored)) {
+        setUmkmList(stored);
+      }
+      showNotification('Data UMKM berhasil di-refresh!', 'info');
+    } finally {
+      setIsFirebaseSyncing(false);
     }
   };
 
@@ -1137,6 +1149,39 @@ export default function App() {
         onClose={() => setSelectedUMKM(null)}
       />
 
+      {/* DIALOG KONFIRMASI HAPUS DATA UMKM ADMIN (Tanpa popup window.confirm) */}
+      {deleteConfirmUMKMId && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-slate-100">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
+              <Trash2 className="w-6 h-6 stroke-[2]" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-extrabold text-slate-900 text-base">Hapus Data UMKM?</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Apakah Anda yakin ingin menghapus data usaha ini? Tindakan ini akan menghapus data dari sistem dan direktori InfoUMKM.
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmUMKMId(null)}
+                className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteUMKM}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-sm"
+              >
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* GLOBAL TOAST NOTIFICATION ELEGAN (Menggantikan popup browser alert) */}
       {toast && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] max-w-md w-[92%] sm:w-auto animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto">
@@ -1162,8 +1207,11 @@ export default function App() {
                 <CheckCircle2 className="w-4 h-4" />
               )}
             </div>
-            <div className="flex-1 text-xs sm:text-sm font-semibold leading-snug">
-              {toast.message}
+            <div className="flex-1 text-xs sm:text-sm font-semibold leading-snug flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/20 text-white shrink-0">
+                {toast.type === 'error' ? 'Peringatan' : toast.type === 'info' ? 'Info' : 'Sukses'}
+              </span>
+              <span>{toast.message}</span>
             </div>
             <button
               onClick={() => setToast(null)}

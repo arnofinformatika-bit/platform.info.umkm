@@ -90,11 +90,11 @@ export default function UMKM({
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={onResetData}
-              title="Kembalikan data ke kondisi awal"
+              title="Muat ulang dan sinkronkan data UMKM"
               className="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset UMKM</span>
+              <span>Refresh Data</span>
             </button>
           </div>
         </div>

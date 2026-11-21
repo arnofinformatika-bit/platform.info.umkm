@@ -6,7 +6,7 @@ import {
   onValue, 
   get 
 } from 'firebase/database';
-import { initialUMKMData } from '../data/initialData';
+import { initialUMKMData, getStoredUMKM } from '../data/initialData';
 
 // Status koneksi Firebase
 let connectionState = {
@@ -139,6 +139,33 @@ export const deleteUMKMFromFirebase = async (id) => {
     console.log('[Firebase] UMKM berhasil dihapus dari RTDB:', cleanId);
   } catch (err) {
     console.error('[Firebase] Gagal hapus UMKM dari RTDB:', err);
+  }
+};
+
+/**
+ * Mengambil data UMKM sekali dari Firebase RTDB (untuk fungsi refresh)
+ */
+export const fetchUMKMOnce = async () => {
+  if (!rtdb) return getStoredUMKM();
+  try {
+    const snapshot = await get(ref(rtdb, 'umkm'));
+    if (snapshot.exists()) {
+      const val = snapshot.val();
+      let list = [];
+      if (Array.isArray(val)) {
+        list = val.filter(Boolean);
+      } else if (typeof val === 'object' && val !== null) {
+        list = Object.keys(val).map((k) => ({
+          ...val[k],
+          id: Number(val[k].id) || val[k].id || k
+        }));
+      }
+      return list;
+    }
+    return [];
+  } catch (err) {
+    console.warn('[Firebase] fetchUMKMOnce error:', err);
+    return getStoredUMKM();
   }
 };
 

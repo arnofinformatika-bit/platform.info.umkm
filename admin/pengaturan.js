@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Save, Shield, Database, Bell, Check } from 'lucide-react';
+import { Settings, Save, Shield, Database, Bell, Check, RotateCcw } from 'lucide-react';
 
 export default function PengaturanAdmin({ onResetData, onSyncFirebase, isFirebaseSyncing, firebaseStatus }) {
   const [siteName, setSiteName] = useState('InfoUMKM');
@@ -142,18 +142,19 @@ export default function PengaturanAdmin({ onResetData, onSyncFirebase, isFirebas
         </div>
       </div>
 
-      {/* Database Reset Section */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-rose-200 shadow-2xs space-y-4">
-        <h3 className="font-bold text-rose-900 text-base">Zona Data & Pemulihan</h3>
+      {/* Database Refresh Section */}
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-blue-200 shadow-2xs space-y-4">
+        <h3 className="font-bold text-slate-900 text-base">Sinkronisasi & Pembaruan Data</h3>
         <p className="text-xs text-slate-500">
-          Jika data pengujian perlu dikembalikan ke kondisi awal bawaan gambar dummy.
+          Muat ulang seluruh data UMKM secara segar dari server database dan sinkronkan dengan tampilan terbaru.
         </p>
 
         <button
           onClick={onResetData}
-          className="px-4 py-2.5 rounded-xl border border-rose-300 text-rose-700 hover:bg-rose-50 text-xs font-bold transition-colors cursor-pointer"
+          className="px-4 py-2.5 rounded-xl border border-blue-300 text-blue-700 hover:bg-blue-50 text-xs font-bold transition-colors cursor-pointer flex items-center gap-2"
         >
-          Reset Seluruh Database ke Dummy Awal
+          <RotateCcw className="w-4 h-4" />
+          <span>Refresh Data UMKM</span>
         </button>
       </div>
     </div>
